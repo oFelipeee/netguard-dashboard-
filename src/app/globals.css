@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+  /* Paleta Navy (fundos) */
+  --color-navy-950: #050D1A;
+  --color-navy-900: #0A1628;
+  --color-navy-800: #0F2240;
+  --color-navy-700: #1A3558;
+  --color-navy-600: #2A4A73;
+
+  /* Cores de Status (Trust) */
+  --color-trust-green: #10B981;
+  --color-trust-amber: #F59E0B;
+  --color-trust-red: #EF4444;
+  --color-trust-blue: #3B82F6;
+
+  /* Fontes (usando as variáveis do Next.js) */
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
+
+  /* Animações */
+  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.3s ease-out;
+
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  @keyframes slide-up {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Sombras */
+  --shadow-secure: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-navy-950);
+    color: #f1f5f9;
+    font-family: var(--font-sans);
+  }
+
+  /* Scrollbar discreta */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-navy-950);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-navy-700);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-navy-600);
+  }
+}
+
+@layer utilities {
+  .font-mono-secure {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    letter-spacing: -0.025em;
+  }
+}
