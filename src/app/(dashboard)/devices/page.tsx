@@ -2,16 +2,7 @@
 
 import { SecureCard } from "../../../components/ui/SecureCard";
 import { Monitor, Server, Router, Wifi, Search, Filter } from "lucide-react";
-import { useState } from "react";
-
-const devices = [
-  { id: 1, name: "Firewall Principal", ip: "192.168.1.1", type: "router", status: "online", uptime: "45d 12h", location: "Data Center A" },
-  { id: 2, name: "Servidor Web", ip: "192.168.1.10", type: "server", status: "online", uptime: "30d 8h", location: "Data Center A" },
-  { id: 3, name: "Switch Core", ip: "192.168.1.2", type: "switch", status: "online", uptime: "60d 3h", location: "Data Center B" },
-  { id: 4, name: "Access Point", ip: "192.168.1.50", type: "ap", status: "warning", uptime: "12d 5h", location: "Escritório 2F" },
-  { id: 5, name: "Servidor DB", ip: "192.168.1.20", type: "server", status: "online", uptime: "90d 1h", location: "Data Center A" },
-  { id: 6, name: "Router Secundário", ip: "192.168.1.3", type: "router", status: "offline", uptime: "0d 0h", location: "Data Center B" },
-];
+import { useState, useEffect } from "react";
 
 const statusColors = {
   online: "bg-trust-green",
@@ -27,7 +18,27 @@ const typeIcons = {
 };
 
 export default function DevicesPage() {
+  const [devices, setDevices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        const response = await fetch("/api/devices");
+        if (response.ok) {
+          const data = await response.json();
+          setDevices(data);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar dispositivos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDevices();
+  }, []);
 
   const filteredDevices = devices.filter(
     (device) =>
@@ -35,9 +46,17 @@ export default function DevicesPage() {
       device.ip.includes(searchTerm)
   );
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-4 border-trust-green/30 border-t-trust-green rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* header */}
+      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-100">Dispositivos de Rede</h1>
         <p className="text-slate-400 text-sm mt-1">
@@ -45,7 +64,7 @@ export default function DevicesPage() {
         </p>
       </div>
 
-      {/* status */}
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <SecureCard secured={false}>
           <div className="flex items-center gap-3">
@@ -90,9 +109,9 @@ export default function DevicesPage() {
         </SecureCard>
       </div>
 
-      {/* devices */}
+      {/* Lista de Dispositivos */}
       <SecureCard title="Todos os Dispositivos">
-        {/* buscar */}
+        {/* Busca */}
         <div className="flex items-center gap-3 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -110,7 +129,7 @@ export default function DevicesPage() {
           </button>
         </div>
 
-        {/* table */}
+        {/* Tabela */}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
