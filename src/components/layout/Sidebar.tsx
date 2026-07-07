@@ -54,16 +54,12 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Rodapé da Sidebar (Status de Segurança) */}
+      {/* footer */}
       <div className="p-4 border-t border-navy-700/50">
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-navy-800/50 border border-navy-700/50">
           <div className="w-2 h-2 rounded-full bg-trust-green animate-pulse-soft" />
           <span className="text-xs font-medium text-slate-300">Sistema Protegido</span>
         </div>
-        <button className="flex items-center w-full px-3 py-2 mt-2 text-sm text-slate-400 hover:text-trust-red hover:bg-trust-red/5 rounded-lg transition-colors">
-          <LogOut className="w-4 h-4 mr-2" />
-          Sair
-        </button>
       </div>
     </aside>
   );

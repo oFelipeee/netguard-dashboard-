@@ -1,5 +1,10 @@
-import { Sidebar } from "@/src/components/layout/Sidebar";
-import { TopBar } from "@/src/components/layout/TopBar";
+"use client";
+
+import { Sidebar } from "../../components/layout/Sidebar";
+import { TopBar } from "../../components/layout/TopBar";
+import { Footer } from "../../components/layout/Footer";
+import { SessionProvider } from "next-auth/react";
+import { Toaster } from "sonner";
 
 export default function DashboardLayout({
   children,
@@ -7,14 +12,23 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-navy-950 text-slate-100">
-      <Sidebar />
-      <div className="ml-64 flex flex-col min-h-screen">
-        <TopBar />
-        <main className="flex-1 p-6 overflow-auto">
-          {children}
-        </main>
+    <SessionProvider>
+      <div className="min-h-screen bg-navy-950 text-slate-100 flex">
+        <Sidebar />
+        <div className="flex-1 ml-64 flex flex-col min-h-screen">
+          <TopBar />
+          <main className="flex-1 p-6 overflow-auto">
+            {children}
+          </main>
+          <Footer />
+        </div>
       </div>
-    </div>
+      
+      <Toaster 
+        position="top-right" 
+        theme="dark"
+        richColors
+      />
+    </SessionProvider>
   );
 }
