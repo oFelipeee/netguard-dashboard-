@@ -6,14 +6,21 @@ import { StatCard } from "../../components/dashboard/StatCard";
 import { TrafficChart } from "../../components/dashboard/TrafficChart";
 import { DeviceList } from "../../components/dashboard/DeviceList";
 import { useNetworkMetrics } from "../../hooks/useNetworkMetrics";
+import { useState, useEffect } from "react";
 import { Shield, Wifi, AlertTriangle, Activity, RefreshCw } from "lucide-react";
 
 export default function DashboardPage() {
   const metrics = useNetworkMetrics();
+const [mounted, setMounted] = useState(false);
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString("pt-BR", { hour12: false });
-  };
+useEffect(() => {
+  setMounted(true);
+}, []);
+
+const formatTime = (date: Date) => {
+  if (!mounted) return "--:--:--";
+  return date.toLocaleTimeString("pt-BR", { hour12: false });
+};
 
   return (
     <div className="space-y-6">
@@ -41,7 +48,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* KPIs - Cards de Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={<Wifi className="w-5 h-5" />}
@@ -73,7 +79,6 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Gráfico + Lista */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <SecureCard title="Tráfego de Rede" className="lg:col-span-2">
           <TrafficChart />
@@ -83,7 +88,6 @@ export default function DashboardPage() {
         </SecureCard>
       </div>
 
-      {/* Cards de Conteúdo */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <SecureCard title="Status do Firewall">
           <div className="space-y-3">
