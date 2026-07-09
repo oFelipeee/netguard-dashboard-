@@ -30,7 +30,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     });
 
     return NextResponse.json(device);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erro PUT:", error);
     return NextResponse.json({ error: "Erro ao atualizar" }, { status: 500 });
   }
@@ -46,7 +46,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     });
 
     return NextResponse.json({ message: "Removido com sucesso" });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erro DELETE:", error);
     return NextResponse.json({ error: "Erro ao deletar" }, { status: 500 });
   }

@@ -1,9 +1,11 @@
 "use client";
 
 import { SecureCard } from "../../../components/ui/SecureCard";
+import { useSocket } from "../../../hooks/useSocket";
 import { Monitor, Server, Router, Wifi, Search, Filter, Plus, Pencil, Trash2, X, Save } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { io } from "socket.io-client"; 
 
 const statusColors = {
   online: "bg-trust-green",
@@ -18,7 +20,6 @@ const typeIcons = {
   ap: Wifi,
 };
 
-// Tipo para o formulário
 type DeviceForm = {
   name: string;
   ip: string;
@@ -37,12 +38,12 @@ export default function DevicesPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   
-  // Estados para o Modal/Formulário
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<DeviceForm>(initialFormState);
 
-  // Carregar dados
+  const { isConnected } = useSocket();
+
   const fetchDevices = async () => {
     try {
       const res = await fetch("/api/devices");
@@ -55,11 +56,22 @@ export default function DevicesPage() {
     }
   };
 
+
   useEffect(() => {
     fetchDevices();
+
+    const socket = io({ path: "/api/socketio" });
+    
+    socket.on("devices-updated", (devices) => {
+      setDevices(devices);
+    });
+
+    return () => {
+      socket.off("devices-updated");
+      socket.disconnect();
+    };
   }, []);
 
-  // Handlers do CRUD
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -79,7 +91,9 @@ export default function DevicesPage() {
         setShowForm(false);
         setEditingId(null);
         setFormData(initialFormState);
-        fetchDevices(); // Recarrega a lista
+        fetchDevices();
+        
+        await fetch("/api/devices/notify", { method: "POST" });
       } else {
         toast.error("Erro ao salvar dispositivo");
       }
@@ -104,6 +118,8 @@ export default function DevicesPage() {
       if (res.ok) {
         toast.success("Dispositivo removido!");
         fetchDevices();
+        
+        await fetch("/api/devices/notify", { method: "POST" });
       }
     } catch (error) {
       toast.error("Erro ao deletar");
@@ -116,21 +132,28 @@ export default function DevicesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header com Botão de Adicionar */}
+      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-slate-100">Dispositivos de Rede</h1>
-          <p className="text-slate-400 text-sm mt-1">Gerenciamento completo via API REST</p>
         </div>
-        <button 
-          onClick={() => { setShowForm(true); setEditingId(null); setFormData(initialFormState); }}
-          className="flex items-center gap-2 px-4 py-2 bg-trust-green hover:bg-trust-green/90 text-white rounded-lg font-medium transition-colors"
-        >
-          <Plus className="w-4 h-4" /> Novo Dispositivo
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-trust-green' : 'bg-trust-red'} animate-pulse`} />
+            <span className="text-xs text-slate-400">
+              {isConnected ? "Tempo Real" : "Desconectado"}
+            </span>
+          </div>
+          <button 
+            onClick={() => { setShowForm(true); setEditingId(null); setFormData(initialFormState); }}
+            className="flex items-center gap-2 px-4 py-2 bg-trust-green hover:bg-trust-green/90 text-white rounded-lg font-medium transition-colors"
+          >
+            <Plus className="w-4 h-4" /> Novo Dispositivo
+          </button>
+        </div>
       </div>
 
-      {/* Stats Rápidos */}
+      {/* stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <SecureCard secured={false}>
           <div className="flex items-center gap-3">
@@ -152,7 +175,7 @@ export default function DevicesPage() {
         </SecureCard>
       </div>
 
-      {/* Formulário de Criação/Edição (Modal Simples) */}
+      {/* forms */}
       {showForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-navy-900 border border-navy-700 rounded-xl p-6 w-full max-w-lg shadow-2xl">
@@ -209,7 +232,7 @@ export default function DevicesPage() {
         </div>
       )}
 
-      {/* Tabela Principal */}
+      {/* tabelinha */}
       <SecureCard title="Todos os Dispositivos">
         <div className="flex items-center gap-3 mb-4">
           <div className="relative flex-1">

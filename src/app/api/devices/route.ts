@@ -4,7 +4,6 @@ import { z } from "zod";
 
 const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
 
-// validação
 const deviceSchema = z.object({
   name: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
   ip: z.string().refine((val) => ipRegex.test(val), "IP inválido"),
@@ -14,7 +13,7 @@ const deviceSchema = z.object({
   location: z.string(),
 });
 
-// GEt
+// GET
 export async function GET() {
   try {
     const devices = await prisma.device.findMany({
@@ -36,7 +35,7 @@ export async function POST(request: Request) {
     if (!validation.success) {
       return NextResponse.json({ 
         error: "Dados inválidos", 
-        details: validation.error.errors 
+        details: validation.error.issues  // ← MUDANÇA AQUI
       }, { status: 400 });
     }
 
@@ -45,11 +44,15 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(device, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erro POST device:", error);
     
-    // Tratamento específico para IP duplicado
-    if (error.code === "P2002") {
+    if (
+      error && 
+      typeof error === 'object' && 
+      'code' in error && 
+      (error as any).code === "P2002"
+    ) {
       return NextResponse.json({ 
         error: "Já existe um dispositivo com este IP" 
       }, { status: 409 });
