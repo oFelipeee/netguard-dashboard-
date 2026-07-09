@@ -12,22 +12,30 @@ export function useSocket() {
   useEffect(() => {
     if (!socket) {
       socket = io({
-        path: "/api/socketio",
+        path: "/socket.io",  
+        transports: ["websocket", "polling"],
       });
     }
 
     socket.on("connect", () => {
+      console.log("✅ Socket conectado!");
       setIsConnected(true);
       setTransport(socket!.io.engine.transport.name);
     });
 
     socket.on("disconnect", () => {
+      console.log(":( Socket desconectado");
       setIsConnected(false);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error(":( Erro de conexão:", error.message);
     });
 
     return () => {
       socket?.off("connect");
       socket?.off("disconnect");
+      socket?.off("connect_error");
     };
   }, []);
 
