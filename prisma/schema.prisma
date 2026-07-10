@@ -19,6 +19,18 @@ model User {
   auditLogs AuditLog[]
 }
 
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([token])
+}
+
 model Device {
   id        String   @id @default(cuid())
   name      String

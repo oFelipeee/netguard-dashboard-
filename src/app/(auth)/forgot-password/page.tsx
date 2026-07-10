@@ -3,22 +3,41 @@
 import { useState } from "react";
 import { Shield, Mail, AlertCircle, CheckCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [debugLink, setDebugLink] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    setSuccess(true);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setSuccess(true);
+        setDebugLink(data.debugLink || "");
+        toast.success("Instruções enviadas para seu email!");
+      } else {
+        setError(data.error || "Erro ao processar solicitação");
+      }
+    } catch (error) {
+      setError("Erro de conexão");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -119,8 +138,28 @@ export default function ForgotPasswordPage() {
                     Verifique sua caixa de entrada e spam
                   </p>
                 </div>
+
+                {/* Link de debug (só em desenvolvimento) */}
+                {debugLink && (
+                  <div className="p-3 rounded-lg bg-trust-amber/10 border border-trust-amber/30 text-left">
+                    <p className="text-xs text-trust-amber mb-2 font-medium">
+                      🔧 Link de debug (apenas desenvolvimento):
+                    </p>
+                    <a
+                      href={debugLink}
+                      className="text-xs text-trust-amber hover:underline break-all"
+                    >
+                      {debugLink}
+                    </a>
+                  </div>
+                )}
+
                 <button
-                  onClick={() => setSuccess(false)}
+                  onClick={() => {
+                    setSuccess(false);
+                    setEmail("");
+                    setDebugLink("");
+                  }}
                   className="w-full py-3 rounded-lg bg-navy-800 hover:bg-navy-700 border border-navy-600 text-slate-200 font-medium transition-all"
                 >
                   Enviar Novamente
