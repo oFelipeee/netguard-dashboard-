@@ -1,13 +1,10 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { prisma } from "./prisma";
 
-const loginSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
-});
-
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     Credentials({
       name: "credentials",
@@ -16,21 +13,51 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Senha", type: "password" },
       },
       authorize: async (credentials) => {
-        const parsed = loginSchema.safeParse(credentials);
-        if (!parsed.success) return null;
-
-        const { email, password } = parsed.data;
-
-        if (email === "admin@netguard.io" && password === "admin123") {
-          return {
-            id: "1",
-            email: email,
-            name: "Admin",
-            role: "admin",
-          };
+        console.log("🔍 Tentativa de login...");
+        console.log("📥 Credentials:", credentials);
+        
+        const parsed = z.object({
+          email: z.string().email(),
+          password: z.string().min(6),
+        }).safeParse(credentials);
+        
+        if (!parsed.success) {
+          console.log("❌ Validação falhou");
+          return null;
         }
 
-        return null;
+        const { email, password } = parsed.data;
+        console.log("📧 Email:", email);
+
+        // Buscar usuário no banco
+        const user = await prisma.user.findUnique({
+          where: { email },
+        });
+
+        if (!user) {
+          console.log("❌ Usuário NÃO encontrado:", email);
+          return null;
+        }
+
+        console.log("✅ Usuário encontrado:", user.email);
+
+        // Comparar senha
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        console.log("🔑 Senha válida?", isPasswordValid);
+
+        if (!isPasswordValid) {
+          console.log("❌ Senha inválida para:", email);
+          return null;
+        }
+
+        console.log("✅ Login bem-sucedido:", email, "| Role:", user.role);
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        };
       },
     }),
   ],
@@ -44,16 +71,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.id = (user as any).id;
         token.role = (user as any).role;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
+        (session.user as any).id = token.id;
         (session.user as any).role = token.role;
       }
       return session;
     },
   },
   secret: process.env.AUTH_SECRET,
-});
+};
+
+export default NextAuth(authOptions);

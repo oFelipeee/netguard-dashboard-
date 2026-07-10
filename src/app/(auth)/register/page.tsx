@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Shield, User, Mail, Lock, AlertCircle, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -32,17 +33,35 @@ export default function RegisterPage() {
 
     setLoading(true);
 
-    // 🔒 MOCK: Em produção, isso faria uma requisição pra API
-    // Simulando registro bem-sucedido
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    setSuccess(true);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          role: "user", // Novos usuários são sempre "user"
+        }),
+      });
 
-    // Redireciona após 2 segundos
-    setTimeout(() => {
-      router.push("/login");
-    }, 2000);
+      if (res.ok) {
+        setSuccess(true);
+        setLoading(false);
+
+        // Redireciona após 2 segundos
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+      } else {
+        const data = await res.json();
+        setError(data.error || "Erro ao criar conta");
+        setLoading(false);
+      }
+    } catch (error) {
+      setError("Erro de conexão");
+      setLoading(false);
+    }
   };
 
   if (success) {

@@ -85,7 +85,7 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Link Esqueceu a senha */}
+            {/* esqueci senha */}
             <div className="flex justify-end">
               <Link
                 href="/forgot-password"
@@ -114,7 +114,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Footer com link */}
           <div className="px-8 py-4 bg-navy-800/30 border-t border-navy-700/50 text-center">
             <p className="text-sm text-slate-400">
               Não tem uma conta?{" "}
@@ -125,7 +124,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Selo de segurança embaixo */}
         <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-500">
           <Lock className="w-3 h-3" />
           <span>Conexão criptografada · Acesso restrito</span>
