@@ -77,3 +77,59 @@ Sistema completo de monitoramento e gerenciamento de dispositivos de rede com au
 ```bash
 git clone https://github.com/seu-usuario/netguard-dashboard.git
 cd netguard-dashboard
+```
+
+2. **Instale as Dependências
+```bash
+npm install
+```
+
+3. **Configure as variáveis de ambiente**
+Crie um arquivo .env na raiz:
+```bash
+# Database (Supabase)
+DATABASE_URL="postgresql://postgres:[senha]@db.[seu-projeto].supabase.co:5432/postgres"
+
+# Autenticação
+AUTH_SECRET="sua-secret-aqui"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="sua-nextauth-secret"
+```
+
+4. **Configure o projeto**
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+5. **Execute o projeto**
+```bash
+npm run dev
+```
+
+📱 **Screenshots**
+Login:
+<img width="690" height="875" alt="image" src="https://github.com/user-attachments/assets/a1ebcee3-a5a6-4343-b548-34542ca4beaa" />
+
+Dashboard:
+<img width="1906" height="982" alt="image" src="https://github.com/user-attachments/assets/1c967c71-9e70-43a2-b585-ec411411e0a1" />
+
+Dispositivos:
+<img width="1920" height="971" alt="image" src="https://github.com/user-attachments/assets/f0415816-d200-4ec5-81d3-98f1628d283b" />
+
+Users:
+<img width="1919" height="970" alt="image" src="https://github.com/user-attachments/assets/00685faf-ad12-4196-9f12-0b67a90615fa" />
+
+## 📈 Próximas Funcionalidades (Roadmap)
+    2FA (Google Authenticator)
+    Upload de arquivos
+    Logs de auditoria detalhados
+    Exportação de relatórios (PDF/CSV)
+    Notificações push
+    Modo escuro/claro
+
+## 💻 Desenvolvedor
+### Felipe Paulino
+
+## 📄 Licença
+Este projeto está sob a licença MIT.
